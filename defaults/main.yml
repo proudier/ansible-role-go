@@ -1,0 +1,6 @@
+---
+
+user:
+  name: john
+  group: john
+  home: /dev/null

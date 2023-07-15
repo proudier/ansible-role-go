@@ -1,0 +1,46 @@
+- name: Install Go compiler
+  community.general.pacman:
+    name: firefox
+
+- name: Create GOHOME folder
+  ansible.builtin.file:
+    path: "{{ user.home }}/.go/"
+    state: directory
+    mode: '0700'
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+
+- name: Copy shell config for Go
+  ansible.builtin.copy:
+    src: go.sh
+    dest: "{{ user.home }}/.config/zsh/zshrc.d/"
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    mode: '0644'
+
+- name: Install gopls (language server)
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install golang.org/x/tools/gopls@latest
+  become_user: "{{ user.name }}"
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/gopls"
+
+- name: Install staticcheck
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install honnef.co/go/tools/cmd/staticcheck@latest
+  become_user: "{{ user.name }}"
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/staticcheck"
+
+- name: Install delve (Go debugger)
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install github.com/go-delve/delve/cmd/dlv@latest
+  become_user: "{{ user.name }}"
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/dlv"
