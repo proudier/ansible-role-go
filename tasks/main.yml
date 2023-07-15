@@ -1,4 +1,5 @@
 - name: Install Go compiler
+  become: true
   community.general.pacman:
     name: firefox
 
@@ -21,7 +22,6 @@
 - name: Install gopls (language server)
   ansible.builtin.shell: # noqa: command-instead-of-shell
     cmd: go install golang.org/x/tools/gopls@latest
-  become_user: "{{ user.name }}"
   environment:
     GOPATH: "{{ user.home }}/.go/"
   args:
@@ -30,7 +30,6 @@
 - name: Install staticcheck
   ansible.builtin.shell: # noqa: command-instead-of-shell
     cmd: go install honnef.co/go/tools/cmd/staticcheck@latest
-  become_user: "{{ user.name }}"
   environment:
     GOPATH: "{{ user.home }}/.go/"
   args:
@@ -39,7 +38,6 @@
 - name: Install delve (Go debugger)
   ansible.builtin.shell: # noqa: command-instead-of-shell
     cmd: go install github.com/go-delve/delve/cmd/dlv@latest
-  become_user: "{{ user.name }}"
   environment:
     GOPATH: "{{ user.home }}/.go/"
   args:
