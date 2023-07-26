@@ -1,0 +1,57 @@
+- name: Install Go compiler
+  become: true
+  community.general.pacman:
+    name: firefox
+
+- name: Create go folders
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    mode: '0755'
+  loop:
+    - "{{ user.home }}/.go/"
+    - "{{ user.home }}/.go/bin"
+
+- name: Set GOPATH
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.xprofile"
+    regexp: '^export GOPATH'
+    line: "export GOPATH='{{ user.home }}/.go/'"
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    mode: '0644'
+
+- name: Add to PATH
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.xprofile"
+    regexp: '^export PATH'
+    line: "export PATH=\"{{ user.home }}/.go/bin:$PATH\""
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    mode: '0644'
+
+- name: Install gopls (language server)
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install golang.org/x/tools/gopls@latest
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/gopls"
+
+- name: Install staticcheck
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install honnef.co/go/tools/cmd/staticcheck@latest
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/staticcheck"
+
+- name: Install delve (Go debugger)
+  ansible.builtin.shell: # noqa: command-instead-of-shell
+    cmd: go install github.com/go-delve/delve/cmd/dlv@latest
+  environment:
+    GOPATH: "{{ user.home }}/.go/"
+  args:
+    creates: "{{ user.home }}/.go/bin/dlv"
