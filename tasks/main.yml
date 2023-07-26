@@ -3,18 +3,31 @@
   community.general.pacman:
     name: firefox
 
-- name: Create GOHOME folder
+- name: Create go folders
   ansible.builtin.file:
-    path: "{{ user.home }}/.go/"
+    path: "{{ item }}"
     state: directory
-    mode: '0700'
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
+    mode: '0755'
+  loop:
+    - "{{ user.home }}/.go/"
+    - "{{ user.home }}/.go/bin"
 
-- name: Copy shell config for Go
-  ansible.builtin.copy:
-    src: go.sh
-    dest: "{{ user.home }}/.config/zsh/zshrc.d/"
+- name: Set GOPATH
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.xprofile"
+    regexp: '^export GOPATH'
+    line: "export GOPATH='{{ user.home }}/.go/'"
+    owner: "{{ user.name }}"
+    group: "{{ user.group }}"
+    mode: '0644'
+
+- name: Add to PATH
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.xprofile"
+    regexp: '^export PATH'
+    line: "export PATH=\"{{ user.home }}/.go/bin:$PATH\""
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
     mode: '0644'
