@@ -14,23 +14,18 @@
     - "{{ user.home }}/.go/"
     - "{{ user.home }}/.go/bin"
 
-- name: Set GOPATH
+- name: Set {GO}PATH in xprofile
   ansible.builtin.lineinfile:
     path: "{{ user.home }}/.xprofile"
-    regexp: '^export GOPATH'
-    line: "export GOPATH='{{ user.home }}/.go/'"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
     owner: "{{ user.name }}"
     group: "{{ user.group }}"
     mode: '0644'
-
-- name: Add to PATH
-  ansible.builtin.lineinfile:
-    path: "{{ user.home }}/.xprofile"
-    regexp: '^export PATH'
-    line: "export PATH=\"{{ user.home }}/.go/bin:$PATH\""
-    owner: "{{ user.name }}"
-    group: "{{ user.group }}"
-    mode: '0644'
+    create: true
+  loop:
+    - { regexp: '^export PATH', line: "export PATH=\"{{ user.home }}/.go/bin:$PATH\"" }
+    - { regexp: '^export GOPATH', line: "export GOPATH='{{ user.home }}/.go/'" }
 
 - name: Install gopls (language server)
   ansible.builtin.shell: # noqa: command-instead-of-shell
